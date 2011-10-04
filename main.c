@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "board.h"
+#include "algo.h"
 
 #define MATRIX_FILE "matrix.txt"
 #define DISABLE_CHECK
