@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = 
 
 DEPS = 
-OBJ = main.o
+OBJ = main.o board.o
 
 peter-ai: ${OBJ}
 	${CC} -o $@ $^ ${CFLAGS}
