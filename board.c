@@ -1,6 +1,7 @@
 #include "board.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 
 // Time
@@ -11,15 +12,17 @@ int timestamp;
 // Board Structure
 
 int halfstep;
-bool over;
 char player;
 char matrix[SIDE_LEN][SIDE_LEN];
 int score[MAX_PLAYERS];
-unsigned char team[MAX_PLAYERS];
+
 unsigned char h_count[MAX_PLAYERS][SIDE_LEN];
 unsigned char v_count[MAX_PLAYERS][SIDE_LEN];
+unsigned char team[MAX_PLAYERS];
 char row_pos[MAX_PLAYERS][MAX_PIECES];
 char col_pos[MAX_PLAYERS][MAX_PIECES];
+
+bool over;
 bool parade[MAX_PLAYERS];
 
 // Movements
@@ -29,18 +32,50 @@ const int MOVE_COL[MOVE_VAR] = {1, -1, 2, -2, 2, -2, 1, -1};
 
 // Functions
 
-void remove_piece(char player, char row, char col)
-{
-	h_count[player][row]--;
-	v_count[player][col]--;
+// TODO: ALL VARIABLES NAMED "P" AND RELATED TO PLAYER RENAME TO "PL"
 
-	char i, last = --team[player];
-	for (i = 0; i <= team[player]; ++i)
-		if (row_pos[player][i] == row && col_pos[player][i]) {
-			row_pos[player][i] = row_pos[player][last];
-			col_pos[player][i] = col_pos[player][last];
-			break;
-		}
+void print_all()
+{
+	printf("halfstep: %d\n", halfstep);
+	printf("over: %d\n", over);
+	printf("player: %d\n", player);
+	printf("score: %d %d\n", score[0], score[1]);
+	printf("team: %d %d\n", team[0], team[1]);
+	printf("parade: %d %d\n", parade[0], parade[1]);
+	printf("~~~~~~~~~~~~~~~~\n");
+	int r, c, pl;
+	for (r = 0; r < SIDE_LEN; ++r) {
+		for (c = 0; c < SIDE_LEN; ++c)
+			printf("%c", matrix[r][c]);
+		printf("\n");
+	}
+	for (pl = 0; pl < MAX_PLAYERS; ++pl) {
+		printf("~~~~~~~~~~~~~~~~\n");
+		printf("Player %d\n", pl);
+		printf("score: %d\nteam: %d\nparade: %d\n", 
+			score[pl], team[pl], parade[pl]);
+
+		printf("h_count: ");
+		for (r = 0; r < SIDE_LEN; ++r)
+			printf("%d ", (int)h_count[pl][r]);
+		printf("\n");
+
+		printf("v_count: ");
+		for (r = 0; r < SIDE_LEN; ++r)
+			printf("%d ", (int)v_count[pl][r]);
+		printf("\n");
+
+		printf("row_pos: ");
+		for (r = 0; r < team[pl]; ++r)
+			printf("%d ", (int)row_pos[pl][r]);
+		printf("\n");
+
+		printf("col_pos: ");
+		for (r = 0; r < team[pl]; ++r)
+			printf("%d ", (int)col_pos[pl][r]);
+		printf("\n");
+	}
+	printf("\n\n");
 }
 
 void add_piece(char player, char row, char col)
@@ -53,6 +88,22 @@ void add_piece(char player, char row, char col)
 	col_pos[player][last] = col;
 }
 
+void remove_piece(char player, char row, char col)
+{
+	h_count[player][row]--;
+	v_count[player][col]--;
+
+	char i, last = --team[player];
+	for (i = 0; i <= team[player]; ++i)
+		if (row_pos[player][i] == row && col_pos[player][i] == col) {
+			row_pos[player][i] = row_pos[player][last];
+			col_pos[player][i] = col_pos[player][last];
+			return;
+		}
+	fprintf(stderr, "ACHTUNG remove");
+	exit(3);
+}
+
 void move_piece(char player, char row, char col, char d_row, char d_col)
 {
 	h_count[player][row]--;
@@ -62,11 +113,13 @@ void move_piece(char player, char row, char col, char d_row, char d_col)
 
 	char i;
 	for (i = 0; i < team[player]; ++i)
-		if (row_pos[player][i] == row && col_pos[player][i]) {
+		if (row_pos[player][i] == row && col_pos[player][i] == col) {
 			row_pos[player][i] = d_row;
 			col_pos[player][i] = d_col;
-			break;
+			return;
 		}
+	fprintf(stderr, "ACHTUNG move");
+	exit(3);
 }
 
 void init_board()
@@ -85,8 +138,8 @@ void init_board()
 	for (r = 0; r < SIDE_LEN; ++r)
 	for (c = 0; c < SIDE_LEN; ++c)
 		if (isalpha(matrix[r][c])) {
-			int p = ch2player(matrix[r][c]);
-			add_piece(p, r, c);
+			int pl = ch2player(matrix[r][c]);
+			add_piece(pl, r, c);
 		}
 	parade[0] = parade[1] = 0;
 }
@@ -117,15 +170,22 @@ char move(struct Step *st)
 		if (h_count[1][i] == team[1] || v_count[1][i] == team[1])
 			parade[1] = 1;
 	}
-	if (parade[0]) score[1] += 3;
+	if (parade[0]) score[0] += 3;
 	if (parade[1]) score[1] += 3;
 	over = parade[0] || parade[1];
+
+	// turning halfstep
+	++halfstep;
+	player = op(player);
 
 	return target;
 }
 
 void unmove(struct Step *st, char old)
 {
+	--halfstep;
+	player = op(player);
+
 	// move piece back
 	matrix[st->row0][st->col0] = player2ch(player);
 	matrix[st->row1][st->col1] = old;
@@ -134,6 +194,7 @@ void unmove(struct Step *st, char old)
 	// parade of pieces
 	if (parade[0]) score[0] -= 3;
 	if (parade[1]) score[1] -= 3;
+	parade[0] = parade[1] = 0;
 	over = 0;
 
 	if (isdigit(old))
@@ -144,6 +205,7 @@ void unmove(struct Step *st, char old)
 		score[player] -= 1;
 		add_piece(op(player), st->row1, st->col1);
 	}
+
 }
 
 void read_config(FILE *f)
@@ -152,7 +214,6 @@ void read_config(FILE *f)
 	char winner, me;
 	fscanf(f, "%c %d %c\n", &me, &halfstep, &winner);
 	player = ch2player(me);
-
 	// checking for game over
 	if (winner != 'U') {
 		fprintf(stderr, "game is already over\n");
@@ -174,6 +235,9 @@ void read_config(FILE *f)
 		do { c = fgetc(f); }
 		while (c != '\n');
 	}
+
+	// initialization
+	init_board();
 }
 
 void write_config(FILE *f)
