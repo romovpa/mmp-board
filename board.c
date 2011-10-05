@@ -15,12 +15,81 @@ bool over;
 char player;
 char matrix[SIDE_LEN][SIDE_LEN];
 int score[MAX_PLAYERS];
-int team[MAX_PLAYERS];
-int h_count[MAX_PLAYERS][SIDE_LEN];
-int v_count[MAX_PLAYERS][SIDE_LEN];
+unsigned char team[MAX_PLAYERS];
+unsigned char h_count[MAX_PLAYERS][SIDE_LEN];
+unsigned char v_count[MAX_PLAYERS][SIDE_LEN];
+char row_pos[MAX_PLAYERS][MAX_PIECES];
+char col_pos[MAX_PLAYERS][MAX_PIECES];
 bool parade[MAX_PLAYERS];
 
+// Movements
+
+const int MOVE_ROW[MOVE_VAR] = {2, 2, 1, 1, -1, -1, -2, -2};
+const int MOVE_COL[MOVE_VAR] = {1, -1, 2, -2, 2, -2, 1, -1};
+
 // Functions
+
+void remove_piece(char player, char row, char col)
+{
+	h_count[player][row]--;
+	v_count[player][col]--;
+
+	char i, last = --team[player];
+	for (i = 0; i <= team[player]; ++i)
+		if (row_pos[player][i] == row && col_pos[player][i]) {
+			row_pos[player][i] = row_pos[player][last];
+			col_pos[player][i] = col_pos[player][last];
+			break;
+		}
+}
+
+void add_piece(char player, char row, char col)
+{
+	h_count[player][row]++;
+	v_count[player][col]++;
+
+	char last = team[player]++;
+	row_pos[player][last] = row;
+	col_pos[player][last] = col;
+}
+
+void move_piece(char player, char row, char col, char d_row, char d_col)
+{
+	h_count[player][row]--;
+	v_count[player][col]--;
+	h_count[player][d_row]++;
+	v_count[player][d_col]++;
+
+	char i;
+	for (i = 0; i < team[player]; ++i)
+		if (row_pos[player][i] == row && col_pos[player][i]) {
+			row_pos[player][i] = d_row;
+			col_pos[player][i] = d_col;
+			break;
+		}
+}
+
+void init_board()
+{
+	char r, c;
+
+	// board initialization
+	over = 0;
+	for (r = 0; r < SIDE_LEN; ++r) {
+		h_count[0][r] = 0;
+		v_count[0][r] = 0;
+		h_count[1][r] = 0;
+		v_count[1][r] = 0;
+	}
+	team[0] = team[1] = 0;
+	for (r = 0; r < SIDE_LEN; ++r)
+	for (c = 0; c < SIDE_LEN; ++c)
+		if (isalpha(matrix[r][c])) {
+			int p = ch2player(matrix[r][c]);
+			add_piece(p, r, c);
+		}
+	parade[0] = parade[1] = 0;
+}
 
 char move(struct Step *st)
 {
@@ -32,18 +101,13 @@ char move(struct Step *st)
 	if (isalpha(target)) {
 		// eating
 		score[player] += 1;
-		team[op(player)]--;
-		h_count[op(player)][st->row1]--;
-		v_count[op(player)][st->col1]--;
+		remove_piece(op(player), st->row1, st->col1);
 	}
 
 	// move piece
 	matrix[st->row0][st->col0] = '-';
-	h_count[player][st->row0]--;
-	v_count[player][st->col0]--;
 	matrix[st->row1][st->col1] = player2ch(player);
-	h_count[player][st->row1]++;
-	v_count[player][st->col1]++;
+	move_piece(player, st->row0, st->col0, st->row1, st->col1);
 
 	// checking for parade of pieces
 	int i;
@@ -64,11 +128,8 @@ void unmove(struct Step *st, char old)
 {
 	// move piece back
 	matrix[st->row0][st->col0] = player2ch(player);
-	h_count[player][st->row1]--;
-	v_count[player][st->col1]--;
-	h_count[player][st->row0]++;
-	v_count[player][st->col0]++;
 	matrix[st->row1][st->col1] = old;
+	move_piece(player, st->row1, st->col1, st->row0, st->col0);
 
 	// parade of pieces
 	if (parade[0]) score[0] -= 3;
@@ -81,16 +142,12 @@ void unmove(struct Step *st, char old)
 	if (isalpha(old)) {
 		// return the eated piece
 		score[player] -= 1;
-		team[op(player)]++;
-		h_count[op(player)][st->row1]++;
-		v_count[op(player)][st->col1]++;
+		add_piece(op(player), st->row1, st->col1);
 	}
 }
 
 void read_config(FILE *f)
 {
-	int r, c;
-
 	// reading game status
 	char winner, me;
 	fscanf(f, "%c %d %c\n", &me, &halfstep, &winner);
@@ -110,30 +167,13 @@ void read_config(FILE *f)
 	timerem[1] = (int) CLOCKS_PER_SEC * t;
 
 	// reading matrix
+	int r, c;
 	for (r = 0; r < SIDE_LEN; ++r) {
 		for (c = 0; c < SIDE_LEN; ++c)
 			matrix[r][c] = (char)fgetc(f);
 		do { c = fgetc(f); }
 		while (c != '\n');
 	}
-
-	// board initialization
-	over = 0;
-	for (r = 0; r < SIDE_LEN; ++r) {
-		h_count[0][r] = 0;
-		v_count[0][r] = 0;
-		h_count[1][r] = 0;
-		v_count[1][r] = 0;
-	}
-	team[0] = team[1] = 0;
-	for (r = 0; r < SIDE_LEN; ++r)
-	for (c = 0; c < SIDE_LEN; ++c)
-		if (isalpha(matrix[r][c])) {
-			int p = ch2player(matrix[r][c]);
-			team[p]++;
-			h_count[p][r]++;
-			v_count[p][c]++;
-		}
 }
 
 void write_config(FILE *f)
