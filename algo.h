@@ -8,4 +8,4 @@
 
 struct Step find_step();
 
-#endif __ALGO_H
+#endif // __ALGO_H
