@@ -26,7 +26,12 @@ while outcome == 0
   fprintf('%s:\n', id);
   
   % run executable
-  system(commands{player});
+  status = system(commands{player});
+  if status ~= 0
+    outcome = -1;
+    descr = 'Program exited with non-zero code';
+    break;
+  end
   
   % save result
   copyfile(MATRIX_FILE, ['matrix_' id '.txt']);
@@ -45,14 +50,15 @@ end
 
 if outcome < 0
   fprintf('Incorrect step: %s\n', descr);
-end
-
-fprintf('Score: %d--%d\n', cur.score(1), cur.score(2));
-switch outcome
-  case 1
-    fprintf('Player A wins!\n');
-  case 2
-    fprintf('Player B wins!\n');
-  case 3
-    fprintf('Draw!\n');
+  fprintf('Technical loss of player %c\n', 'A'-1+player);
+else
+  fprintf('Score: %d--%d\n', cur.score(1), cur.score(2));
+  switch outcome
+    case 1
+      fprintf('Player A wins!\n');
+    case 2
+      fprintf('Player B wins!\n');
+    case 3
+      fprintf('Draw!\n');
+  end
 end
