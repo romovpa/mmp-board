@@ -18,6 +18,8 @@ end
 hold on;
 axis manual;
 axis ij;
+axis square;
+axis off;
 axis([0 8 0 8]);
 
 bgcolors = [1   1   1     % white
