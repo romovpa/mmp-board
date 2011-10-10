@@ -23,10 +23,12 @@ while outcome == 0
   player = cur.player;
   fullstep = floor((cur.halfstep+1)/2);
   id = sprintf('%c_%d', 'A'-1+player, fullstep);
-  fprintf('%s:\n', id);
+  fprintf('%s: ', id);
   
   % run executable
+  tic;
   status = system(commands{player});
+  time_actually = toc;
   if status ~= 0
     outcome = -1;
     descr = 'Program exited with non-zero code';
@@ -35,17 +37,23 @@ while outcome == 0
   
   % save result
   copyfile(MATRIX_FILE, ['matrix_' id '.txt']);
-  
+
   % update outcome
   prev = cur;
   cur = readgame(MATRIX_FILE);
   [outcome,descr,move] = checkstep(prev, cur, type);
   
+  % print time
+  time_change = prev.time(player) - cur.time(player);
+  fprintf('%f sec elapsed (%f actually)', time_change, time_actually);
+
   % visualization
   if vis
     plotboard(cur.matrix, move);
     waitforbuttonpress;
   end
+
+  fprintf('\n');
 end
 
 if outcome < 0
