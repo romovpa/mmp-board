@@ -1,0 +1,62 @@
+%%% DOCUMENT
+\documentclass[a4paper]{article}
+% article options:
+%   - a4paper, letterpaper
+%   - twocolumn
+%   - landscape
+%   - 10p, 11pt, 12pt
+%   - draft
+
+%%% PACKAGES
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc} 
+\usepackage[pdftex,unicode]{hyperref}
+\usepackage[russian,english]{babel}   % language
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{subfig}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{color}
+\usepackage{pb-diagram}
+%\usepackage{movie15}
+
+% style
+\usepackage{indentfirst}
+\usepackage{fullpage}
+
+%%% TITLE
+\title{Искусственный интеллект для игры "Коньки"}
+\author{Петр Ромов, группа 317}
+\date{}
+
+%%% CONTENT
+\begin{document}
+
+\maketitle
+
+\section{Описание игры}
+
+Игра происходит на доске размера $8 \times 8$. На доске изначально находятся фишки двух цветов: красные и синие, некоторые клетки доски помечены цифрами (1 или 2). Начальный счет 0--0. Игра ведется по следующим правилам:
+\begin{enumerate}
+\item Игроки ходят поочередно: первый игрок --- красными фишками, второй --- синими. За один ход игрок обязан передвинуть одну фишку.
+\item Фишки ходят как шахматный конь.
+\item Ходить можно на любую клетку, не занятую своей фишкой.
+	\begin{itemize}
+	\item Если клетка была помечена цифрой, метка удаляется, сделавшему ход прибавляется соответствующее цифре число очков.
+	\item Если клетка была занята фишкой соперника, то фишка соперника ``съедается'', а сделавшему ход прибавляется 1 очко.
+	\end{itemize}
+\item Если фишки одного из игроков располагаются на одной горизонтали/вертикали, то этому игроку прибавляется 3 очка, игра заканчивается. При этом, если после некоторого хода у обоих игроков фишки располагаются на одной горизонтали/вертикали, то обоим игрокам прибавляется 3 очка.
+\item Выигрывает игрок, набравший наибольшее число очков. При равенстве очков --- ничья.
+\item Если за 30 ходов игра не закончилась, засчитывается ничья (независимо от текущего счета).
+\end{enumerate}
+
+\section{Алгоритм и реализация}
+
+\section{Примеры работы алгоритма}
+
+\section{Выводы}
+
+\end{document}
