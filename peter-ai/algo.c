@@ -8,7 +8,7 @@
 #define INF INT_MAX
 
 /* Options */
-#define MAX_DEPTH 8
+#define MAX_DEPTH 3
 #define MAX_STEPS 130
 
 #define MAX_SCORE 200
@@ -23,6 +23,14 @@
 
 // checking for opponent's pieces parade (requires additional loop)
 #define STEPS_ORDER_OP_PARADE
+
+// evaluate: score difference heuristic
+#define EVALUATE_SCORE
+#define EVALUATE_SCORE_W 1
+
+// evaluate: straightness heuristic
+#define EVALUATE_STRAIGHT
+#define EVALUATE_STRAIGHT_W 1
 
 /* Search Structure */
 struct Step steps[MAX_DEPTH][MAX_STEPS];
@@ -145,18 +153,27 @@ int evaluate()
 	STAT_INC(count_evaluate);
 	int res = 0;
 
-	res += score[player] - score[op(player)];
+	#ifdef EVALUATE_SCORE
+	res += (score[player] - score[op(player)])*EVALUATE_SCORE_W;
+	#endif
 
-	// compactness
+	#ifdef EVALUATE_STRAIGHT
 	int i;
 	unsigned char v_maxc = 0, h_maxc = 0;
+	unsigned char opp_v_maxc = 0, opp_h_maxc = 0;
 	for (i = 0; i < SIDE_LEN; i++) {
 		if (v_maxc < v_count[player][i])
 			v_maxc = v_count[player][i];
 		if (h_maxc < h_count[player][i])
 			h_maxc = h_count[player][i];
+		if (opp_v_maxc < v_count[op(player)][i])
+			opp_v_maxc = v_count[op(player)][i];
+		if (opp_h_maxc < h_count[op(player)][i])
+			opp_h_maxc = h_count[op(player)][i];
 	}
-	res += (h_maxc + v_maxc);
+	res += ((h_maxc > v_maxc ? h_maxc : v_maxc) -
+	       (opp_h_maxc > opp_v_maxc ? opp_h_maxc : opp_v_maxc))*EVALUATE_STRAIGHT_W;
+	#endif
 
 	return res;
 }
