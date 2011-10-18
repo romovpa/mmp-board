@@ -14,11 +14,11 @@
 #define MAX_SCORE 200
 #define WIN_VALUE (INF-MAX_SCORE)
 
-// enable NegaScout
-#define SEARCH_NS
+// enable null-window heuristic
+#define SEARCH_NULLWIN
 
 // enable step ordering (does search)
-//#define STEPS_ORDER
+#define STEPS_ORDER
 #define STEPS_MAX_COST 2
 
 // checking for opponent's pieces parade (requires additional loop)
@@ -32,13 +32,17 @@ int depth, max_depth;
 
 /* Statistics */
 #ifdef STATISTICS
-int count_evaluate = 0;   // number of evaluate() calls
-int count_alphabeta = 0;  // number of alphabeta() calls
-int count_prunings = 0;   // number of prunings
-int count_over = 0;       // number of game overs found
-int count_steps = 0;      // number of steps generated
+int count_evaluate = 0;      // number of evaluate() calls
+int count_alphabeta = 0;     // number of alphabeta() calls
+int count_prunings = 0;      // number of prunings
+int count_over = 0;          // number of game overs found
+int count_steps = 0;         // number of steps generated
+#ifdef SEARCH_NULLWIN
+int count_nullwin = 0;       // number of null-window searches
+int count_nullwin_fails = 0; // number of null-window fails
+#endif
 #ifdef STEPS_ORDER
-int count_step_order[STEPS_MAX_COST+1]; // number of steps has the order
+int count_step_order[STEPS_MAX_COST+1] = {0,0,0}; // number of steps has the order
 #endif 
 
 void print_statistics()
@@ -46,9 +50,13 @@ void print_statistics()
 	printf("Statistics:\n");
 	printf("  alphabeta calls:   %d \n", count_alphabeta);
 	printf("  prunings:          %d \n", count_prunings);
-	printf("  evaluate calls  :  %d \n", count_evaluate);
+	printf("  evaluate calls:    %d \n", count_evaluate);
 	printf("  game over found:   %d \n", count_over);
 	printf("  steps generated:   %d \n", count_steps);
+	#ifdef SEARCH_NULLWIN
+	printf("  null-window calls: %d (%.3lf%% fails)\n", count_nullwin,
+	       (double)(count_nullwin_fails)/count_nullwin);
+	#endif
 	#ifdef STEPS_ORDER
 	printf("  order values:      ");
 	int k;
@@ -202,7 +210,7 @@ int alphabeta(int alpha, int beta)
 	generate_steps();
 	struct Step *st_p = &steps[depth][0];
 
-	#ifdef SEARCH_NS
+	#ifdef SEARCH_NULLWIN
 	int b = beta;
 	#endif
 	int i, tmp;
@@ -212,12 +220,15 @@ int alphabeta(int alpha, int beta)
 		old = move(st_p);
 		depth++;
 
-		#ifdef SEARCH_NS
-		// null window search
+		#ifdef SEARCH_NULLWIN
+		// null-window search
+		STAT_INC(count_nullwin);
 		tmp = -alphabeta(-b, -alpha);
-		// full re-search, if null window failed
-		if ((alpha < tmp) && (tmp < beta) && i)
+		// full re-search, if null-window failed
+		if ((alpha < tmp) && (tmp < beta) && i) {
+			STAT_INC(count_nullwin_fails);
 			tmp = -alphabeta(-beta, -alpha);
+		}
 		#else
 		// simple search
 		old = move(st_p);
@@ -242,7 +253,7 @@ int alphabeta(int alpha, int beta)
 			break;
 		}
 
-		#ifdef SEARCH_NS
+		#ifdef SEARCH_NULLWIN
 		// update b
 		b = alpha + 1;
 		#endif
