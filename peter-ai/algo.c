@@ -17,6 +17,13 @@
 // enable NegaScout
 #define SEARCH_NS
 
+// enable step ordering (does search)
+//#define STEPS_ORDER
+#define STEPS_MAX_COST 2
+
+// checking for opponent's pieces parade (requires additional loop)
+#define STEPS_ORDER_OP_PARADE
+
 /* Search Structure */
 struct Step steps[MAX_DEPTH][MAX_STEPS];
 int steps_num[MAX_DEPTH];
@@ -29,17 +36,29 @@ int count_evaluate = 0;   // number of evaluate() calls
 int count_alphabeta = 0;  // number of alphabeta() calls
 int count_prunings = 0;   // number of prunings
 int count_over = 0;       // number of game overs found
+int count_steps = 0;      // number of steps generated
+#ifdef STEPS_ORDER
+int count_step_order[STEPS_MAX_COST+1]; // number of steps has the order
+#endif 
 
 void print_statistics()
 {
 	printf("Statistics:\n");
-	printf("  alphabeta() calls: %d \n", count_alphabeta);
+	printf("  alphabeta calls:   %d \n", count_alphabeta);
 	printf("  prunings:          %d \n", count_prunings);
-	printf("  evaluate() calls:  %d \n", count_evaluate);
+	printf("  evaluate calls  :  %d \n", count_evaluate);
 	printf("  game over found:   %d \n", count_over);
+	printf("  steps generated:   %d \n", count_steps);
+	#ifdef STEPS_ORDER
+	printf("  order values:      ");
+	int k;
+	for (k = 0; k <= STEPS_MAX_COST; ++k)
+		printf("%d(%.2lf%%) ", k, (double)(count_step_order[k])/count_steps);
+	printf("\n");
+	#endif
 }
 
-#define STAT_INC(V) V++;
+#define STAT_INC(V) ++V;
 #else
 #define STAT_INC(V) 
 #endif // STATISTICS
@@ -68,6 +87,24 @@ void show_diagnostics()
 }
 
 /* STEPS function */
+void sort_steps()
+{
+	struct Step tmp;
+	struct Step *ptr, *s_ptr = &steps[depth][0];
+	struct Step *end_ptr = &steps[depth][steps_num[depth]];
+	int c;
+	for (c = STEPS_MAX_COST; c >= 0; --c)
+		for (ptr = s_ptr; ptr != end_ptr; ++ptr) {
+			if (ptr->cost != c)
+				continue;
+			// pulling step up
+			tmp = *s_ptr;
+			*s_ptr = *ptr;
+			*ptr = tmp;
+			++s_ptr;
+		}
+}
+
 void generate_steps()
 {
 	int i, t, num = 0;
@@ -89,11 +126,32 @@ void generate_steps()
 			st_p->col1 = cn;
 			st_p++;
 			num++;
+			STAT_INC(count_steps);
 
-			// TODO: THINK: ok, what about ordering?
+			// deciding step cost
+			#ifdef STEPS_ORDER
+			st_p->cost = 0;
+			if (matrix[rn][cn] == player2ch(op(player))) {
+				st_p->cost = 1; // eating
+				#ifdef STEPS_ORDER_OP_PARADE
+				int t;
+				for (t = 0; t < SIDE_LEN; ++t)
+					if (h_count[op(player)][t] + 1 == team[op(player)] ||
+					    v_count[op(player)][t] + 1 == team[op(player)])
+					    st_p->cost = 2; // game over, opponent has a parade
+				#endif
+			}
+			if (h_count[player][rn] + 1 == team[player] ||
+			    v_count[player][cn] + 1 == team[player])
+				st_p->cost = 2; // game over, player has a parade
+			STAT_INC(count_step_order[st_p->cost]);
+			#endif
 		}
 	}
 	steps_num[depth] = num;
+	#ifdef STEPS_ORDER
+	sort_steps();
+	#endif
 }
 
 /* EVALUATE function */
