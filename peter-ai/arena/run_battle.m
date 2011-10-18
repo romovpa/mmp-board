@@ -1,13 +1,18 @@
+function run_battle(tests)
 % left-vs-right fight testing
+% tests: cell array of test file names
+%        e.g.: {'one.txt', 'two.txt'}
 
 game = 'horses';
 
 tests_dir = '../tests/';
-tests_list = dir([tests_dir '*.txt']);
-tests = { tests_list.name };
+if ~exist('tests', 'var')
+  tests_list = dir([tests_dir '*.txt']);
+  tests = { tests_list.name };
+end
 
 right = {'../peter-ai'};
-left = { './naive.ai' };
+left = { '../peter-ai' };
 
 wins = [0 0]; % [left right]
 
