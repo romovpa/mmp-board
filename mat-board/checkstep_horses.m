@@ -48,13 +48,6 @@ if ~issame(delta, [1 2])
   return;
 end
 
-% player changed opponent's score
-if cur.score(opponent) ~= prev.score(opponent)
-  outcome = -1;
-  description = 'Player changed opponent''s score';
-  return;
-end
-
 ex_score = prev.score;
 
 % eating

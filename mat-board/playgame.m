@@ -45,7 +45,8 @@ while outcome == 0
   
   % print time
   time_change = prev.time(player) - cur.time(player);
-  fprintf('%f sec elapsed (%f actually)', time_change, time_actually);
+  fprintf('Time elapsed: %f sec (%f actually)\n', time_change, time_actually);
+  fprintf('Score: %d--%d\n', cur.score(1), cur.score(2));
 
   % visualization
   if vis
