@@ -1,9 +1,8 @@
 #ifndef __ALGO_H
 #define __ALGO_H
 
+// enable computation of various counters
 #define STATISTICS
-
-#define DEBUG(S) { printf(S); printf("\n"); fflush(stdout); }
 
 #include "board.h"
 

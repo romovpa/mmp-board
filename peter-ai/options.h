@@ -32,4 +32,4 @@
 #define EVALUATE_STRAIGHT
 #define EVALUATE_STRAIGHT_W 3
 
-#endif
+#endif // __OPTIONS_H
