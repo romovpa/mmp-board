@@ -5,32 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define INF INT_MAX
-
-/* Options */
-#define MAX_DEPTH 3
-#define MAX_STEPS 130
-
-#define MAX_SCORE 200
-#define WIN_VALUE (INF-MAX_SCORE)
-
-// enable null-window heuristic
-#define SEARCH_NULLWIN
-
-// enable step ordering (does search)
-#define STEPS_ORDER
-#define STEPS_MAX_COST 2
-
-// checking for opponent's pieces parade (requires additional loop)
-#define STEPS_ORDER_OP_PARADE
-
-// evaluate: score difference heuristic
-#define EVALUATE_SCORE
-#define EVALUATE_SCORE_W 1
-
-// evaluate: straightness heuristic
-#define EVALUATE_STRAIGHT
-#define EVALUATE_STRAIGHT_W 1
+#include "options.h"
 
 /* Search Structure */
 struct Step steps[MAX_DEPTH][MAX_STEPS];

@@ -4,7 +4,7 @@
 #include "algo.h"
 
 #define MATRIX_FILE "matrix.txt"
-#define DISABLE_CHECK
+//#define CONFIG_CHECK
 
 int main(int argc, char *argv[])
 {
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 	fclose(f);
 
 	// checking configuration
-	#ifndef DISABLE_CHECK
+	#ifdef CONFIG_CHECK
 	check_config();
 	#endif
 
