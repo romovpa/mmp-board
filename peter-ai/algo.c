@@ -71,29 +71,6 @@ void print_statistics()
 #define STAT_INC(V) 
 #endif // STATISTICS
 
-/* Functions */
-
-int ab_call_num = 0;
-void show_diagnostics()
-{
-	ab_call_num++;
-	fprintf(stderr, "Call %d, depth %d, player %c", ab_call_num, depth, player2ch(player));
-	if (over) fprintf(stderr, " [over]");
-	fprintf(stderr, "\n");
-	fprintf(stderr, "Scores: %d %d\n", score[0], score[1]);
-	if (score[0] < 0 || score[1] < 0)
-		printf("Negative score: %d\n", ab_call_num);
-
-	int r, c;
-	for (r = 0; r < SIDE_LEN; ++r) {
-		for (c = 0; c < SIDE_LEN; ++c)
-			fprintf(stderr, "%c", matrix[r][c]);
-		fprintf(stderr, "\n");
-	}
-
-	fprintf(stderr, "\n");
-}
-
 /* STEPS function */
 void sort_steps()
 {
@@ -163,7 +140,6 @@ void generate_steps()
 }
 
 /* EVALUATE function */
-// TODO: THINK: ok, what about complicated evaluations?
 int evaluate()
 {
 	STAT_INC(count_evaluate);
