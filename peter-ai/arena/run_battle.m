@@ -29,7 +29,7 @@ for r_idx = 1:length(right)
     % B: right
     fprintf('== map: %s\n', mat_name);
     fprintf('A: %s\nB: %s\n', l_cmd, r_cmd);
-    fprintf('----\n');
+    fprintf('--------\n');
     outcome = playgame(game, {l_cmd, r_cmd}, mat_filename);
     if ismember(outcome, [1 2])
       wins(outcome) = wins(outcome) + 1;
@@ -40,7 +40,7 @@ for r_idx = 1:length(right)
     % B: left
     fprintf('== map: %s\n', mat_name);
     fprintf('A: %s\nB: %s\n', r_cmd, l_cmd);
-    fprintf('----\n');
+    fprintf('--------\n');
     outcome = playgame(game, {r_cmd, l_cmd}, mat_filename);
     if ismember(outcome, [1 2])
       outcome = 3 - outcome;

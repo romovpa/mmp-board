@@ -23,7 +23,7 @@ while outcome == 0
   player = cur.player;
   fullstep = floor((cur.halfstep+1)/2);
   id = sprintf('%c_%d', 'A'-1+player, fullstep);
-  fprintf('%s: ', id);
+  fprintf('%s: \n', id);
   
   % run executable
   tic;
