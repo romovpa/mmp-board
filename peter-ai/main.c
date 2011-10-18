@@ -34,5 +34,10 @@ int main(int argc, char *argv[])
 	write_config(f);
 	fclose(f);
 
+	// print statistics
+	#ifdef STATISTICS
+	print_statistics();
+	#endif
+
 	return 0;
 }
