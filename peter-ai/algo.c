@@ -5,12 +5,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define INF INT_MAX
+
+/* Options */
 #define MAX_DEPTH 8
 #define MAX_STEPS 130
 
 #define MAX_SCORE 200
-#define INF (INT_MAX-MAX_SCORE)
+#define WIN_VALUE (INF-MAX_SCORE)
 
+// enable NegaScout
+#define SEARCH_NS
 
 /* Search Structure */
 struct Step steps[MAX_DEPTH][MAX_STEPS];
@@ -62,6 +67,7 @@ void show_diagnostics()
 	fprintf(stderr, "\n");
 }
 
+/* STEPS function */
 void generate_steps()
 {
 	int i, t, num = 0;
@@ -90,6 +96,7 @@ void generate_steps()
 	steps_num[depth] = num;
 }
 
+/* EVALUATE function */
 // TODO: THINK: ok, what about complicated evaluations?
 int evaluate()
 {
@@ -112,6 +119,7 @@ int evaluate()
 	return res;
 }
 
+/* SEARCH function */
 int alphabeta(int alpha, int beta)
 {
 	STAT_INC(count_alphabeta);
@@ -121,30 +129,48 @@ int alphabeta(int alpha, int beta)
 		int delta_sc = score[player] - score[op(player)];
 		if (delta_sc > 0)
 			// win: as fast as possible
-			return INF - depth;
+			return WIN_VALUE - depth;
 		else if (delta_sc == 0)
 			// draw: neither good nor bad
 			return 0;
 		else
 			// loss: as shameless as possible
-			return - INF + delta_sc;
+			return - WIN_VALUE + delta_sc;
 	}
 	if (depth >= max_depth)
 		// evaluate game position
 		return evaluate();
 
-	int i;
-	struct Step *st_p = &steps[depth][0];
 	generate_steps();
+	struct Step *st_p = &steps[depth][0];
+
+	#ifdef SEARCH_NS
+	int b = beta;
+	#endif
+	int i, tmp;
+	char old;
 	for (i = 0; i < steps_num[depth]; ++i, ++st_p) {
-		char old = move(st_p);
-
+		// make move
+		old = move(st_p);
 		depth++;
-		int tmp = - alphabeta(-beta, -alpha);
-		depth--;
 
+		#ifdef SEARCH_NS
+		// null window search
+		tmp = -alphabeta(-b, -alpha);
+		// full re-search, if null window failed
+		if ((alpha < tmp) && (tmp < beta) && i)
+			tmp = -alphabeta(-beta, -alpha);
+		#else
+		// simple search
+		old = move(st_p);
+		tmp = -alphabeta(-beta, -alpha);
+		#endif
+
+		// unmaking move
+		depth--;
 		unmove(st_p, old);
 
+		// updating alpha
 		if (tmp > alpha)
 			alpha = tmp;
 
@@ -153,14 +179,21 @@ int alphabeta(int alpha, int beta)
 			step_value[i] = tmp;
 
 		if (alpha >= beta) {
+			// prune
 			STAT_INC(count_prunings);
 			break;
 		}
+
+		#ifdef SEARCH_NS
+		// update b
+		b = alpha + 1;
+		#endif
 	}
 
 	return alpha;
 }
 
+/* main function */
 struct Step find_step()
 {
 	// initialization
