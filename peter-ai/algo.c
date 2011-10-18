@@ -3,18 +3,43 @@
 
 #include <limits.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-#define INF INT_MAX
+#define MAX_DEPTH 8
+#define MAX_STEPS 130
 
-// Search Structure
+#define MAX_SCORE 200
+#define INF (INT_MAX-MAX_SCORE)
+
+
+/* Search Structure */
 struct Step steps[MAX_DEPTH][MAX_STEPS];
 int steps_num[MAX_DEPTH];
-
 int step_value[MAX_STEPS];
-
 int depth, max_depth;
 
-// Functions
+/* Statistics */
+#ifdef STATISTICS
+int count_evaluate = 0;   // number of evaluate() calls
+int count_alphabeta = 0;  // number of alphabeta() calls
+int count_prunings = 0;   // number of prunings
+int count_over = 0;       // number of game overs found
+
+void print_statistics()
+{
+	printf("Statistics:\n");
+	printf("  alphabeta() calls: %d \n", count_alphabeta);
+	printf("  prunings:          %d \n", count_prunings);
+	printf("  evaluate() calls:  %d \n", count_evaluate);
+	printf("  game over found:   %d \n", count_over);
+}
+
+#define STAT_INC(V) V++;
+#else
+#define STAT_INC(V) 
+#endif // STATISTICS
+
+/* Functions */
 
 int ab_call_num = 0;
 void show_diagnostics()
@@ -68,10 +93,12 @@ void generate_steps()
 // TODO: THINK: ok, what about complicated evaluations?
 int evaluate()
 {
+	STAT_INC(count_evaluate);
 	int res = 0;
 
 	res += score[player] - score[op(player)];
 
+	// compactness
 	int i;
 	unsigned char v_maxc = 0, h_maxc = 0;
 	for (i = 0; i < SIDE_LEN; i++) {
@@ -80,25 +107,36 @@ int evaluate()
 		if (h_maxc < h_count[player][i])
 			h_maxc = h_count[player][i];
 	}
-	//res += h_maxc + v_maxc;
+	res += (h_maxc + v_maxc);
 
 	return res;
 }
 
 int alphabeta(int alpha, int beta)
 {
-	if (over)
-		return (INF - depth);
+	STAT_INC(count_alphabeta);
+	if (over) {
+		// evaluate game outcome
+		STAT_INC(count_over);
+		int delta_sc = score[player] - score[op(player)];
+		if (delta_sc > 0)
+			// win: as fast as possible
+			return INF - depth;
+		else if (delta_sc == 0)
+			// draw: neither good nor bad
+			return 0;
+		else
+			// loss: as shameless as possible
+			return - INF + delta_sc;
+	}
 	if (depth >= max_depth)
+		// evaluate game position
 		return evaluate();
 
 	int i;
 	struct Step *st_p = &steps[depth][0];
 	generate_steps();
 	for (i = 0; i < steps_num[depth]; ++i, ++st_p) {
-		int mem_score = score[1];
-		struct Step mem_step = *st_p;
-
 		char old = move(st_p);
 
 		depth++;
@@ -110,8 +148,14 @@ int alphabeta(int alpha, int beta)
 		if (tmp > alpha)
 			alpha = tmp;
 
-		if (alpha >= beta)
+		if (depth == 0)
+			// memorize first step value
+			step_value[i] = tmp;
+
+		if (alpha >= beta) {
+			STAT_INC(count_prunings);
 			break;
+		}
 	}
 
 	return alpha;
