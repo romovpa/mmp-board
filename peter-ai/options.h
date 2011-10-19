@@ -18,7 +18,7 @@
 /*** Algorithm-specific options ***/
 
 // maximal searching depth
-#define MAX_DEPTH 8
+#define MAX_DEPTH 12
 
 // setting search depth according to number of pieces, step number, etc.
 #define DEPTH_HEURISTIC
