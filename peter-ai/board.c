@@ -12,6 +12,7 @@ int timestamp;
 // Board Structure
 
 int halfstep;
+int fullstep;
 char player;
 char matrix[SIDE_LEN][SIDE_LEN];
 int score[MAX_PLAYERS];
@@ -31,8 +32,6 @@ const int MOVE_ROW[MOVE_VAR] = {2, 2, 1, 1, -1, -1, -2, -2};
 const int MOVE_COL[MOVE_VAR] = {1, -1, 2, -2, 2, -2, 1, -1};
 
 // Functions
-
-// TODO: ALL VARIABLES NAMED "P" AND RELATED TO PLAYER RENAME TO "PL"
 
 void print_all()
 {
@@ -177,6 +176,8 @@ char move(struct Step *st)
 	// turning halfstep
 	++halfstep;
 	player = op(player);
+	if (!player)
+		++fullstep;
 
 	return target;
 }
@@ -184,6 +185,8 @@ char move(struct Step *st)
 void unmove(struct Step *st, char old)
 {
 	--halfstep;
+	if (!player)
+		--fullstep;
 	player = op(player);
 
 	// move piece back
@@ -214,6 +217,8 @@ void read_config(FILE *f)
 	char winner, me;
 	fscanf(f, "%c %d %c\n", &me, &halfstep, &winner);
 	player = ch2player(me);
+	fullstep = (halfstep+1)/2;
+	printf("Fullstep: %d\n", fullstep);
 	// checking for game over
 	if (winner != 'U') {
 		fprintf(stderr, "game is already over\n");

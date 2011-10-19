@@ -1,6 +1,7 @@
 #ifndef __BOARD_H
 #define __BOARD_H
 
+#define MAX_FULLSTEPS 30
 #define MAX_PLAYERS 2
 #define MAX_PIECES 8
 #define SIDE_LEN 8
@@ -14,6 +15,7 @@
 
 // Board Structure
 extern int halfstep;
+extern int fullstep;
 extern bool over;
 extern char player;
 extern char matrix[SIDE_LEN][SIDE_LEN];
