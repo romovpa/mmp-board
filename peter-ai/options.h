@@ -3,6 +3,9 @@
 
 #define INF INT_MAX
 
+// enable computation of various counters
+#define STATISTICS
+
 // maximal number of steps from one position
 #define MAX_STEPS 130
 
@@ -12,7 +15,7 @@
 /*** Algorithm-specific options ***/
 
 // maximal searching depth
-#define MAX_DEPTH 8
+#define MAX_DEPTH 6
 
 // enable null-window heuristic
 #define SEARCH_NULLWIN
@@ -31,5 +34,7 @@
 // evaluate: straightness heuristic
 #define EVALUATE_STRAIGHT
 #define EVALUATE_STRAIGHT_W 3
+
+#define TIME_CONTROL
 
 #endif // __OPTIONS_H

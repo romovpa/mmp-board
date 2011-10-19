@@ -2,6 +2,7 @@
 
 #include "board.h"
 #include "algo.h"
+#include "options.h"
 
 #define MATRIX_FILE "matrix.txt"
 //#define CONFIG_CHECK
