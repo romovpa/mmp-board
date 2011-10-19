@@ -35,6 +35,4 @@
 #define EVALUATE_STRAIGHT
 #define EVALUATE_STRAIGHT_W 3
 
-#define TIME_CONTROL
-
 #endif // __OPTIONS_H

@@ -7,13 +7,13 @@
 
 #include "options.h"
 
-/* Search Structure */
+/*** Search Structure ***/
 struct Step steps[MAX_DEPTH][MAX_STEPS];
 int steps_num[MAX_DEPTH];
 int step_value[MAX_STEPS];
 int depth, max_depth;
 
-/* Statistics */
+/*** Statistics ***/
 #ifdef STATISTICS
 int count_evaluate = 0;      // number of evaluate() calls
 int count_alphabeta = 0;     // number of alphabeta() calls
@@ -54,7 +54,7 @@ void print_statistics()
 #define STAT_INC(V) 
 #endif // STATISTICS
 
-/* STEPS function */
+/*** STEPS function ***/
 void sort_steps()
 {
 	struct Step tmp;
@@ -122,7 +122,7 @@ void generate_steps()
 	#endif
 }
 
-/* EVALUATE function */
+/*** EVALUATE function ***/
 int evaluate()
 {
 	STAT_INC(count_evaluate);
@@ -153,7 +153,7 @@ int evaluate()
 	return res;
 }
 
-/* SEARCH function */
+/*** SEARCH function ***/
 int alphabeta(int alpha, int beta)
 {
 	STAT_INC(count_alphabeta);
@@ -230,7 +230,7 @@ int alphabeta(int alpha, int beta)
 	return alpha;
 }
 
-/* main function */
+/*** main function ***/
 struct Step find_step()
 {
 	// initialization
