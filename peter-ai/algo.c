@@ -171,6 +171,12 @@ int alphabeta(int alpha, int beta)
 			// loss: as shameless as possible
 			return - WIN_VALUE + delta_sc;
 	}
+	if (fullstep > MAX_FULLSTEPS) {
+		// game over (draw) due to maximal fullstep exceeded
+		STAT_INC(count_over);
+		// draw: neither good nor bad
+		return 0;
+	}
 	if (depth >= max_depth)
 		// evaluate game position
 		return evaluate();
@@ -211,9 +217,10 @@ int alphabeta(int alpha, int beta)
 		if (tmp > alpha)
 			alpha = tmp;
 
-		if (depth == 0)
-			// memorize first step value
+		// memorize first step
+		if (depth == 0) {
 			step_value[i] = tmp;
+		}
 
 		if (alpha >= beta) {
 			// prune

@@ -258,6 +258,10 @@ void write_config(FILE *f)
 			// win
 			winner = (score[0] > score[1] ? player2ch(0) : player2ch(1));
 	}
+	else if (fullstep > MAX_FULLSTEPS) {
+		// draw
+		winner = 'D';
+	}
 	fprintf(f, "%c %d %c\n", player2ch(player), halfstep, winner);
 
 	// writing time & score
