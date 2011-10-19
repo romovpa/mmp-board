@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = 
 
-DEPS = algo.h board.h
+DEPS = algo.h board.h options.h
 OBJ = main.o board.o algo.o
 
 peter-ai: ${OBJ}

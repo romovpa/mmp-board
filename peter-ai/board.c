@@ -228,12 +228,13 @@ void read_config(FILE *f)
 	timerem[1] = (int) CLOCKS_PER_SEC * t;
 
 	// reading matrix
+	// TODO: improve robustness
 	int r, c;
+	char line[12];
 	for (r = 0; r < SIDE_LEN; ++r) {
+		fgets(line, 12*sizeof(char), f);
 		for (c = 0; c < SIDE_LEN; ++c)
-			matrix[r][c] = (char)fgetc(f);
-		do { c = fgetc(f); }
-		while (c != '\n');
+			matrix[r][c] = line[c];
 	}
 
 	// initialization
