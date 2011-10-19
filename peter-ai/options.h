@@ -4,10 +4,10 @@
 #define INF INT_MAX
 
 // do not write result matrix (used for experiments)
-#define FAKE
+//#define FAKE
 
 // enable computation of various counters
-#define STATISTICS
+//#define STATISTICS
 
 // maximal number of steps from one position
 #define MAX_STEPS 130
@@ -18,7 +18,19 @@
 /*** Algorithm-specific options ***/
 
 // maximal searching depth
-#define MAX_DEPTH 6
+#define MAX_DEPTH 8
+
+// setting search depth according to number of pieces, step number, etc.
+#define DEPTH_HEURISTIC
+
+// time control settings
+#define ZEITNOT
+#define ZEITNOT_1 8
+#define ZEITNOT_2 4
+
+// enable debut mode: increase search depth on the first step
+#define DEBUT
+#define DEBUT_FULLSTEPS 2
 
 // enable null-window heuristic
 #define SEARCH_NULLWIN

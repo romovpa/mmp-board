@@ -218,7 +218,6 @@ void read_config(FILE *f)
 	fscanf(f, "%c %d %c\n", &me, &halfstep, &winner);
 	player = ch2player(me);
 	fullstep = (halfstep+1)/2;
-	printf("Fullstep: %d\n", fullstep);
 	// checking for game over
 	if (winner != 'U') {
 		fprintf(stderr, "game is already over\n");
@@ -286,5 +285,10 @@ void stop_clock()
 {
 	int delta = clock() - timestamp;
 	timerem[player] -= delta;
+}
+
+float remains_sec()
+{
+	return (float)timerem[player]/CLOCKS_PER_SEC;
 }
 

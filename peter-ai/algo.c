@@ -54,6 +54,20 @@ void print_statistics()
 #define STAT_INC(V) 
 #endif // STATISTICS
 
+/*** Depth Heuristic ***/
+#ifdef DEPTH_HEURISTIC
+
+int depth_heuristic()
+{
+	int pieces = (team[0] > team[1] ? team[0] : team[1]);
+	if (pieces <= 3) return 8;
+	if (pieces <= 4) return 7;
+	if (pieces <= 8) return 6;
+	return 5;
+}
+
+#endif
+
 /*** STEPS function ***/
 void sort_steps()
 {
@@ -242,7 +256,21 @@ struct Step find_step()
 {
 	// initialization
 	depth = 0;
+	#ifdef DEPTH_HEURISTIC
+	max_depth = depth_heuristic();
+	#else
 	max_depth = MAX_DEPTH;
+	#endif
+	#ifdef DEBUT
+	if (fullstep <= DEBUT_FULLSTEPS)
+		++max_depth;
+	#endif
+	#ifdef ZEITNOT
+	printf("Remains sec: %f\n", remains_sec());
+	if (remains_sec() < ZEITNOT_1) --max_depth;
+	if (remains_sec() < ZEITNOT_2) --max_depth;
+	#endif
+	printf("Search depth: %d\n", max_depth);
 
 	// run search
 	int chance = alphabeta(-INF, INF);

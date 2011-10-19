@@ -46,5 +46,6 @@ void write_config(FILE *f);
 
 void start_clock();
 void stop_clock();
+float remains_sec();
 
 #endif // __BOARD_H
