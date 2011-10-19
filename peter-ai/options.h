@@ -3,6 +3,9 @@
 
 #define INF INT_MAX
 
+// do not write result matrix (used for experiments)
+#define FAKE
+
 // enable computation of various counters
 #define STATISTICS
 

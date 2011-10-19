@@ -31,9 +31,11 @@ int main(int argc, char *argv[])
 	move(&st);
 
 	// write configuration
+	#ifndef FAKE
 	f = fopen(MATRIX_FILE, "wt");
 	write_config(f);
 	fclose(f);
+	#endif
 
 	// print statistics
 	#ifdef STATISTICS
