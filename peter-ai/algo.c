@@ -123,6 +123,8 @@ void generate_steps()
 					    st_p->cost = 2; // game over, opponent has a parade
 				#endif
 			}
+			if (isdigit(matrix[rn][cn]))
+				st_p->cost = 1;
 			if (h_count[player][rn] + 1 == team[player] ||
 			    v_count[player][cn] + 1 == team[player])
 				st_p->cost = 2; // game over, player has a parade
