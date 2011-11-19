@@ -51,7 +51,12 @@ while outcome == 0
   % visualization
   if vis
     plotboard(cur.matrix, move);
-    waitforbuttonpress;
+    if vis == 2
+      print('-depsc2', sprintf('%c_%d_score_%d-%d.eps', 'A'-1+player, fullstep,...
+        cur.score(1), cur.score(2)));
+    else
+      waitforbuttonpress;
+    end
   end
 
   fprintf('\n');
